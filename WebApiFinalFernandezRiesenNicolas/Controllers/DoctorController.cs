@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using WebApiFinalFernandezRiesenNicolas.Models;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApiFinalFernandezRiesenNicolas.Controllers
 {
@@ -34,10 +35,32 @@ namespace WebApiFinalFernandezRiesenNicolas.Controllers
             return doctor;
         }
 
+        [HttpGet("/api/doctores/{especialidad}")]
+        public dynamic GetEspecialidad(string especialidad)
+        {
+            var doctores = (from d in context.Doctores
+                            where d.Especialidad.ToLower() == especialidad.ToLower()
+                            select d).ToList();
+            return doctores;
+        }
+
         [HttpPost]
         public ActionResult Post([FromBody] Doctor doctor)
         {
             context.Doctores.Add(doctor);
+            context.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Put(int id, [FromBody] Doctor doctor)
+        {
+            if (id != doctor.DoctorNo)
+            {
+                BadRequest();
+            }
+
+            context.Entry(doctor).State = EntityState.Modified;
             context.SaveChanges();
             return Ok();
         }
